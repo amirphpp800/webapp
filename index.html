@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Scanner - Web Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary-color: #4cc9f0;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --dark-color: #2d3436;
+            --light-color: #f8f9fa;
+            --gray-color: #6c757d;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #ecf0f3;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 500;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-top: 30px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+        }
+
+        .status-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-good {
+            background-color: var(--success-color);
+        }
+
+        .status-bad {
+            background-color: var(--danger-color);
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .button-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .button-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .button-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .button-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .scanner-section, .results-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .log-container {
+            background-color: var(--dark-color);
+            color: var(--light-color);
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .copy-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px 0;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            header {
+                padding: 20px 0;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>IP Scanner & Ping Test</h1>
+            <p>Web Interface for scanning and testing IPs</p>
+        </header>
+
+        <div class="status-container">
+            <div class="status">
+                <div id="internet-status-icon" class="status-icon"></div>
+                <span id="internet-status">Checking internet connection...</span>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button id="start-scan-btn" class="button button-primary">Start Scanning</button>
+            <button id="stop-scan-btn" class="button button-danger" style="display: none;">Stop Scanning</button>
+            <button id="clear-results-btn" class="button button-danger">Clear Results</button>
+        </div>
+
+        <div class="scanner-section">
+            <h2>Scanner Status</h2>
+            <div class="progress-container">
+                <div id="scan-progress" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <div>
+                <span id="scan-stats">0 found / 0 scanned</span>
+            </div>
+            <div class="log-container" id="scan-log">
+                Click 'Start Scanning' to begin scanning random IPs
+            </div>
+        </div>
+
+        <div class="results-section">
+            <h2>Scan Results</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>IP Address</th>
+                        <th>Ping</th>
+                        <th>Country</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="results-table">
+                    <!-- Results will be added here dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>Created by Goje Pro Max | IP Scanner & Ping Test Application</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check internet connection
+            checkInternetConnection();
+
+            // Set up button event listeners
+            document.getElementById('start-scan-btn').addEventListener('click', startScanning);
+            document.getElementById('stop-scan-btn').addEventListener('click', stopScanning);
+            document.getElementById('clear-results-btn').addEventListener('click', clearResults);
+
+            // Check internet every 10 seconds
+            setInterval(checkInternetConnection, 10000);
+        });
+
+        function checkInternetConnection() {
+            fetch('/check_internet')
+                .then(response => response.json())
+                .then(data => {
+                    const statusIcon = document.getElementById('internet-status-icon');
+                    const statusText = document.getElementById('internet-status');
+
+                    if (data.connected) {
+                        statusIcon.className = 'status-icon status-good';
+                        statusText.textContent = 'Internet Status: Connected';
+                    } else {
+                        statusIcon.className = 'status-icon status-bad';
+                        statusText.textContent = 'Internet Status: Not Connected';
+                    }
+                })
+                .catch(() => {
+                    const statusIcon = document.getElementById('internet-status-icon');
+                    const statusText = document.getElementById('internet-status');
+                    statusIcon.className = 'status-icon status-bad';
+                    statusText.textContent = 'Internet Status: Not Connected';
+                });
+        }
+
+        function startScanning() {
+            fetch('/start_scan')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('start-scan-btn').style.display = 'none';
+                        document.getElementById('stop-scan-btn').style.display = 'inline-block';
+                        document.getElementById('scan-log').textContent = 'Scanning started...\n';
+
+                        // Start progress updates
+                        updateScanProgress();
+                    }
+                });
+        }
+
+        function stopScanning() {
+            fetch('/stop_scan')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('start-scan-btn').style.display = 'inline-block';
+                        document.getElementById('stop-scan-btn').style.display = 'none';
+                        document.getElementById('scan-log').textContent += 'Scanning stopped.\n';
+                    }
+                });
+        }
+
+        function clearResults() {
+            fetch('/clear_results')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('results-table').innerHTML = '';
+                        document.getElementById('scan-log').textContent += 'Results cleared.\n';
+                    }
+                });
+        }
+
+        function updateScanProgress() {
+            fetch('/scan_status')
+                .then(response => response.json())
+                .then(data => {
+                    // Update progress bar
+                    document.getElementById('scan-progress').style.width = data.progress + '%';
+
+                    // Update scan stats
+                    document.getElementById('scan-stats').textContent = 
+                        `${data.successful_scans} found / ${data.total_scans} scanned`;
+
+                    // Update scan log
+                    if (data.log && data.log !== '') {
+                        const logElement = document.getElementById('scan-log');
+                        logElement.textContent = data.log;
+                        logElement.scrollTop = logElement.scrollHeight;
+                    }
+
+                    // Update results table
+                    updateResultsTable(data.results);
+
+                    // Continue updating if scanning is still active
+                    if (data.scanning) {
+                        setTimeout(updateScanProgress, 1000);
+                    } else {
+                        document.getElementById('start-scan-btn').style.display = 'inline-block';
+                        document.getElementById('stop-scan-btn').style.display = 'none';
+                    }
+                });
+        }
+
+        function updateResultsTable(results) {
+            if (!results || results.length === 0) return;
+
+            const resultsTable = document.getElementById('results-table');
+
+            // Add new results at the top
+            results.forEach(result => {
+                // Check if this IP is already in the table
+                const existingRows = resultsTable.querySelectorAll(`tr[data-ip="${result.ip}"]`);
+                if (existingRows.length > 0) return;
+
+                const row = document.createElement('tr');
+                row.setAttribute('data-ip', result.ip);
+
+                row.innerHTML = `
+                    <td>${result.ip}</td>
+                    <td>${result.ping}</td>
+                    <td>${result.country}</td>
+                    <td>
+                        <button class="copy-btn" onclick="copyToClipboard('${result.ip}')">📋</button>
+                    </td>
+                `;
+
+                resultsTable.prepend(row);
+            });
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    // Show a brief notification
+                    const notification = document.createElement('div');
+                    notification.textContent = `Copied: ${text}`;
+                    notification.style.position = 'fixed';
+                    notification.style.bottom = '20px';
+                    notification.style.left = '50%';
+                    notification.style.transform = 'translateX(-50%)';
+                    notification.style.padding = '10px 20px';
+                    notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    notification.style.color = 'white';
+                    notification.style.borderRadius = '5px';
+                    notification.style.zIndex = '1000';
+
+                    document.body.appendChild(notification);
+
+                    // Remove after 2 seconds
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 2000);
+                });
+        }
+    </script>
+</body>
+</html>
